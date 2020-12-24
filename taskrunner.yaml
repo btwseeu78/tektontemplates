@@ -1,0 +1,22 @@
+apiVersion: tekton.dev/v1beta1
+kind: TaskRun
+metadata:
+  name: build-image-from-git-source
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  serviceAccountName: dockerhub-serviceaccount
+  taskref:
+    name: build-and-push-docker-image
+  params:
+  - name: pathToDockerFile
+    value: ./Dockerfile
+  resources:
+    inputs:
+    - name: docker-source
+      resourceRef:
+        name: build-image-via-pipeline
+    outputs:
+    - name: builtImage
+      resourceRef:
+        name: push-image-via-pipeline

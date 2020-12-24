@@ -1,0 +1,40 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: build-and-push-docker-image
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  params: 
+  - name: pathToDockerFile
+    type: string
+    description: The Path To Docker File
+    default: $(resources.inputs.docker-source.path)/Dockerfile
+  - name: pathToContext
+    type: string
+    description: the build context used by kaniko
+    default: $(resources.inputs.docker-source.path)
+  resources:
+    inputs:
+    - name: docker-source
+      type: git
+    outputs:
+    - name: builtImage
+      type: image 
+  steps:
+  - name: build-and-push
+    image: gcr.io/kaniko-project/executor:latest
+    args:
+    - --dockerfile=$(params.pathToDockerFile)
+    - --destination=$(resources.outputs.builtImage.url)
+    - --context=$(params.pathToContext)
+    volumeMounts:
+    - name: kaniko-secret
+      mountPath: "/kaniko/.docker/"
+  volumes:
+  - name: kaniko-secret
+    secret:
+      secretName: regcred
+      items:
+      - key: .dockerconfigjson
+        path: config.json

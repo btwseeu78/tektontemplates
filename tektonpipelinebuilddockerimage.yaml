@@ -1,0 +1,28 @@
+---
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata: 
+  name: build-image-via-pipeline
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  type: git
+  params:
+  - name: revision
+    value: master
+  - name: url
+    value: https://github.com/btwseeu78/demologinapp.git
+...
+---
+apiVersion: tekton.dev/v1alpha1
+kind: PipelineResource
+metadata:
+  name: push-image-via-pipeline
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  type: image
+  params:
+  - name: url
+    value: linuxarpan/kanikotesting:v6
+...
